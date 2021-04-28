@@ -1,7 +1,6 @@
 import React, { Fragment, PureComponent } from 'react';
 import './App.css';
 
-import HttpStatus from 'http-status-codes';
 import {
   Accordion,
   AccordionDetails,
@@ -27,6 +26,7 @@ import {
   Today
 } from '@material-ui/icons';
 import moment from 'moment';
+import { fetchData } from './api';
 
 const styles = (theme) => ({
   root: {
@@ -63,27 +63,11 @@ class App extends PureComponent {
 
   fetchData(activeTab) {
     this.setState({ loading: true }, () => {
-      fetch(`https://itunes.apple.com/us/rss/${activeTab}/limit=100/json`).then(res => {
-        if (res.ok) {
-          res.json().then(json => {
-            console.log(json);
-            let records = [];
-            if (json.feed && json.feed.entry) {
-              records = json.feed.entry;
-            }
-            console.log(records[0]);
-            this.setState({
-              records,
-              loading: false
-            });
-          }).catch(err => {
-            console.log('JSON parse error', err.message);
-            this.setState({ loading: false });
-          });
-        } else {
-          const text = HttpStatus.getStatusText(res.status);
-          throw new Error(text);
-        }
+      fetchData(activeTab).then(records => {
+        this.setState({
+          records,
+          loading: false
+        });
       }).catch(err => {
         console.log(activeTab, err.message);
         this.setState({ loading: false });
